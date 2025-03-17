@@ -46,7 +46,6 @@ impl ParticleSystem {
             
             self.check_collision();
             //self.check_collision_thread(&mut pool);
-
             _cycle += 1;
         }
     }
@@ -67,7 +66,6 @@ impl ParticleSystem {
 
                 if particle_1.collide(particle_2.x, particle_2.y){
                     self.collisions_i32 += 1;
-
                     //println!("Particle collision: {:.4} {:.4}\t{:.4} {:.4} {:.4} {:.4}", i, j, particle_1.x, particle_1.y, particle_2.x, particle_2.y); 
                 }
             }

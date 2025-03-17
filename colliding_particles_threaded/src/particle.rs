@@ -1,6 +1,5 @@
 use crate::COLLISION_DISTANCE;
 
-
 #[derive(Debug, Copy, Clone)]
 pub struct Particle  {
     pub x: f32,
@@ -48,5 +47,4 @@ impl Particle {
         }
         return false;
     }
-
 }
