@@ -44,8 +44,8 @@ impl ParticleSystem {
         for _ in 0..CYCLE_MAX {    
             self.move_particles_thread(&mut pool);
             
-            self.check_collision();
-            //self.check_collision_thread(&mut pool);
+            //self.check_collision();
+            self.check_collision_thread(&mut pool);
             _cycle += 1;
         }
     }
@@ -73,10 +73,11 @@ impl ParticleSystem {
     }
 
     fn check_collision_thread(&mut self, pool: &mut scoped_threadpool::Pool){
+        let particle_clone = &self.particles.clone(); 
         pool.scoped(|scope| {
             for start in (0..PARTICLE_MAX).step_by(PARTICLES_PER_THREAD){
                 let collisions_clone = Arc::clone(&self.collisions_atomic);
-                scope.execute(move || collide_thread_main(start, &self.particles.clone(), collisions_clone));
+                scope.execute(move || collide_thread_main(start, particle_clone, collisions_clone));
             }
         });
     }
@@ -112,7 +113,7 @@ pub fn  move_thread_main (particles: &mut [Particle]){
     }
 }
 
-pub fn collide_thread_main(start: usize, particles: &Vec<Particle>, collision: Arc<AtomicUsize>){
+pub fn collide_thread_main(start: usize, particles: &[Particle], collision: Arc<AtomicUsize>){
     for i in start..(start+PARTICLES_PER_THREAD){
         for j in (i+1)..PARTICLE_MAX{
             let particle_1 = particles[i];
