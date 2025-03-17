@@ -44,8 +44,8 @@ impl ParticleSystem {
         for _ in 0..CYCLE_MAX {    
             self.move_particles_thread(&mut pool);
             
-            //self.check_collision();
-            self.check_collision_thread(&mut pool);
+            self.check_collision();
+            //self.check_collision_thread(&mut pool);
 
             _cycle += 1;
         }
@@ -75,13 +75,10 @@ impl ParticleSystem {
     }
 
     fn check_collision_thread(&mut self, pool: &mut scoped_threadpool::Pool){
-        let particles_arc = Arc::new(self.particles.clone());
-
         pool.scoped(|scope| {
             for start in (0..PARTICLE_MAX).step_by(PARTICLES_PER_THREAD){
-                let particles_clone = Arc::clone(&particles_arc);
                 let collisions_clone = Arc::clone(&self.collisions_atomic);
-                scope.execute(move || collide_thread_main(start, &particles_clone, &collisions_clone));
+                scope.execute(move || collide_thread_main(start, &self.particles.clone(), collisions_clone));
             }
         });
     }
@@ -117,7 +114,7 @@ pub fn  move_thread_main (particles: &mut [Particle]){
     }
 }
 
-pub fn collide_thread_main(start: usize, particles: &Arc<Vec<Particle>>, collision: &Arc<AtomicUsize>){
+pub fn collide_thread_main(start: usize, particles: &Vec<Particle>, collision: Arc<AtomicUsize>){
     for i in start..(start+PARTICLES_PER_THREAD){
         for j in (i+1)..PARTICLE_MAX{
             let particle_1 = particles[i];
@@ -125,14 +122,13 @@ pub fn collide_thread_main(start: usize, particles: &Arc<Vec<Particle>>, collisi
             
             if particle_1.collide(particle_2.x, particle_2.y){
                 collision.fetch_add(1, Ordering::SeqCst);
-
             }
         }
     }
 }
 
 const NUM_OF_THREADS: usize = 10;
-const PARTICLE_MAX: usize = 100;
+const PARTICLE_MAX: usize = 10000;
 const CYCLE_MAX: usize = 1000;
 const PARTICLES_PER_THREAD: usize = PARTICLE_MAX / NUM_OF_THREADS;
 const COLLISION_DISTANCE: f32 = 0.01;
