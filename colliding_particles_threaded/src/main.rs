@@ -75,7 +75,7 @@ impl ParticleSystem {
     fn check_collision_thread(&mut self, pool: &mut scoped_threadpool::Pool){
         let particle_clone = &self.particles.clone(); 
         pool.scoped(|scope| {
-            for start in (0..PARTICLE_MAX).step_by(PARTICLES_PER_THREAD){
+            for start in 0..NUM_OF_THREADS{
                 let collisions_clone = Arc::clone(&self.collisions_atomic);
                 scope.execute(move || collide_thread_main(start, particle_clone, collisions_clone));
             }
@@ -114,7 +114,7 @@ pub fn  move_thread_main (particles: &mut [Particle]){
 }
 
 pub fn collide_thread_main(start: usize, particles: &[Particle], collision: Arc<AtomicUsize>){
-    for i in start..(start+PARTICLES_PER_THREAD){
+    for i in (start..PARTICLE_MAX).step_by(NUM_OF_THREADS){
         for j in (i+1)..PARTICLE_MAX{
             let particle_1 = particles[i];
             let particle_2 = particles[j];
@@ -130,7 +130,7 @@ const NUM_OF_THREADS: usize = 10;
 const PARTICLE_MAX: usize = 10000;
 const CYCLE_MAX: usize = 1000;
 const PARTICLES_PER_THREAD: usize = PARTICLE_MAX / NUM_OF_THREADS;
-const COLLISION_DISTANCE: f32 = 0.01;
+const COLLISION_DISTANCE: f32 = 0.01 * 0.01;
 
 fn main() {
     let mut system = ParticleSystem::new();

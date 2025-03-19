@@ -42,7 +42,7 @@ impl Particle {
     }
 
     pub fn collide(&self, o_x: f32, o_y:f32) -> bool{
-        if (self.x - o_x).powi(2) + (self.y - o_y).powi(2) < COLLISION_DISTANCE.powi(2){
+        if (self.x - o_x).powi(2) + (self.y - o_y).powi(2) < COLLISION_DISTANCE{
             return true;
         }
         return false;
